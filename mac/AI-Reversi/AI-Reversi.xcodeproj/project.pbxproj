@@ -39,6 +39,8 @@
 		2C6906D82298140F00A427D0 /* engine in Resources */ = {isa = PBXBuildFile; fileRef = 2C6906D72298140F00A427D0 /* engine */; };
 		4B423E4F2731A7D100ED5C0C /* Board.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B423E4D2731A7D100ED5C0C /* Board.cpp */; };
 		4B423E552731AB2E00ED5C0C /* Screen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B423E532731AB2E00ED5C0C /* Screen.cpp */; };
+		4B423E6327326AA400ED5C0C /* Solver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B423E6127326AA300ED5C0C /* Solver.cpp */; };
+		4B423E6727326B6B00ED5C0C /* Node.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B423E6527326B6B00ED5C0C /* Node.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -79,6 +81,10 @@
 		4B423E4E2731A7D100ED5C0C /* Board.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Board.hpp; sourceTree = "<group>"; };
 		4B423E532731AB2E00ED5C0C /* Screen.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Screen.cpp; sourceTree = "<group>"; };
 		4B423E542731AB2E00ED5C0C /* Screen.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Screen.hpp; sourceTree = "<group>"; };
+		4B423E6127326AA300ED5C0C /* Solver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Solver.cpp; sourceTree = "<group>"; };
+		4B423E6227326AA400ED5C0C /* Solver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Solver.hpp; sourceTree = "<group>"; };
+		4B423E6527326B6B00ED5C0C /* Node.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Node.cpp; sourceTree = "<group>"; };
+		4B423E6627326B6B00ED5C0C /* Node.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Node.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -148,6 +154,10 @@
 				4B423E4E2731A7D100ED5C0C /* Board.hpp */,
 				4B423E532731AB2E00ED5C0C /* Screen.cpp */,
 				4B423E542731AB2E00ED5C0C /* Screen.hpp */,
+				4B423E6127326AA300ED5C0C /* Solver.cpp */,
+				4B423E6227326AA400ED5C0C /* Solver.hpp */,
+				4B423E6527326B6B00ED5C0C /* Node.cpp */,
+				4B423E6627326B6B00ED5C0C /* Node.hpp */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -256,7 +266,9 @@
 			files = (
 				4B423E4F2731A7D100ED5C0C /* Board.cpp in Sources */,
 				2C17789A1CE0AA7C00BB8AD0 /* Main.cpp in Sources */,
+				4B423E6327326AA400ED5C0C /* Solver.cpp in Sources */,
 				4B423E552731AB2E00ED5C0C /* Screen.cpp in Sources */,
+				4B423E6727326B6B00ED5C0C /* Node.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
