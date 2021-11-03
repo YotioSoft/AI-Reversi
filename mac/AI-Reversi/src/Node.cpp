@@ -17,3 +17,13 @@ Node::Node(Board& arg_board) {
 void Node::addChild(Node* arg_child_node) {
 	children << arg_child_node;
 }
+
+// 子ノードの取得
+Array<Node*> Node::getChildren() {
+	return children;
+}
+
+// 盤面を取得
+Board* Node::getBoard() {
+	return &board;
+}

@@ -5,6 +5,8 @@
 //  Created by YotioSoft on 2021/11/03.
 //
 
+#pragma once
+
 #ifndef Board_hpp
 #define Board_hpp
 
@@ -40,8 +42,18 @@ public:
 	// 座標が有効か
 	bool isPositionValid(Point arg_position);
 	
+	// AIのターンか
+	bool isAIturn();
+	
+	// AIの色
+	SquareStatus::Type getAIcolor();
+	
 	// 盤面のサイズを取得
 	int getBoardSquares();
+	
+	// 点数を取得
+	int getPlayerPoints();
+	int getAIPoints();
 	
 	// コマの色の取得
 	Color getPieceColor(SquareStatus::Type arg_color);

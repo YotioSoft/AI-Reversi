@@ -79,7 +79,7 @@ HashTable<Direction::Type, int> Board::calcObtainPoints(SquareStatus::Type arg_s
 			current_position += d.second;
 		}
 		// 同じ色で挟めていなければ0点
-		if (current_grid[current_position] != arg_subject_color) {
+		if (current_grid[current_position] != arg_subject_color || !isPositionValid(current_position)) {
 			ret[d.first] = 0;
 		}
 	}
@@ -167,6 +167,24 @@ int Board::getBoardSquares() {
 	return board_squares;
 }
 
+// 点数を取得
+int Board::getPlayerPoints() {
+	return player_points;
+}
+int Board::getAIPoints() {
+	return AI_points;
+}
+
+// AIのターンか
+bool Board::isAIturn() {
+	return current_turn_color == AI_square_color;
+}
+
+// AIの色
+SquareStatus::Type Board::getAIcolor() {
+	return AI_square_color;
+}
+
 // コマの色の取得
 Color Board::getPieceColor(SquareStatus::Type arg_color) {
 	if (arg_color == SquareStatus::White) {
@@ -210,7 +228,7 @@ void Board::draw() {
 		for (int x=0; x<board_squares; x++) {
 			// マスの描画
 			// マウスオーバー時
-			if (square_rects[y][x].mouseOver()) {
+			if (current_turn_color == player_square_color && square_rects[y][x].mouseOver()) {
 				HashTable<Direction::Type, int> obtain_points_table = calcObtainPoints(current_turn_color, Point(x, y));
 				int total_obtain_points = calcTotalObtainPoints(obtain_points_table);
 				

@@ -15,6 +15,8 @@
 #define		BACKGROUND_COLOR			Color(0, 177, 106)
 #define		BACKGROUND_COLOR_HILIGHT	Color(35, 203, 167)
 
+class Board;
+
 namespace SquareStatus {
 enum Type {
 	Black	= -1,

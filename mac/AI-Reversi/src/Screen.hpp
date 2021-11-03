@@ -10,6 +10,7 @@
 
 #include "Header.h"
 #include "Board.hpp"
+#include "Solver.hpp"
 
 void mainScreen(Board& board);
 
