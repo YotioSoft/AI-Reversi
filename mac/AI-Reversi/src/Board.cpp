@@ -61,15 +61,15 @@ HashTable<Direction::Type, int> Board::calcObtainPoints(SquareStatus::Type arg_s
 		
 		while (isPositionValid(current_position)) {
 			if (current_grid[current_position] != getEnemyPieceColor(arg_subject_color)) {
-				// 同じ色で挟めていなければ0点
-				if (current_grid[current_position] != arg_subject_color) {
-					ret[d.first] = 0;
-				}
 				break;
 			}
 			
 			ret[d.first] ++;
 			current_position += d.second;
+		}
+		// 同じ色で挟めていなければ0点
+		if (current_grid[current_position] != arg_subject_color) {
+			ret[d.first] = 0;
 		}
 	}
 	
