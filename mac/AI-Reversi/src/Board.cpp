@@ -46,6 +46,86 @@ SquareStatus::Type Board::getEnemyPieceColor(SquareStatus::Type arg_ally_piece_c
 	return SquareStatus::Type(arg_ally_piece_color * -1);
 }
 
+// 各方向の取得可能なコマ数を算出
+HashTable<Direction::Type, int> Board::calcObtainPoints(SquareStatus::Type arg_subject_color, Point arg_start_position) {
+	HashTable<Direction::Type, int> ret;
+	
+	// 各方向に対してひっくり返せるコマ数をカウント
+	for (auto d : direction_vec) {
+		ret[d.first] = 0;
+		if (current_grid[arg_start_position] == arg_subject_color) {
+			break;
+		}
+		
+		Point current_position = arg_start_position + d.second;
+		
+		while (isPositionValid(current_position)) {
+			if (current_grid[current_position] != getEnemyPieceColor(arg_subject_color)) {
+				// 同じ色で挟めていなければ0点
+				if (current_grid[current_position] != arg_subject_color) {
+					ret[d.first] = 0;
+				}
+				break;
+			}
+			
+			ret[d.first] ++;
+			current_position += d.second;
+		}
+	}
+	
+	return ret;
+}
+
+// 取得可能なコマ数の総計
+int Board::calcTotalObtainPoints(HashTable<Direction::Type, int> arg_points_table) {
+	int total_points = 0;
+	
+	for (auto t : arg_points_table) {
+		total_points += t.second;
+	}
+	
+	return total_points;
+}
+
+// コマを置く（注：呼び出し時にマスに置けるか判定済みであることが必須）
+void Board::putPiece(HashTable<Direction::Type, int> arg_obtain_points_table, SquareStatus::Type arg_subject_color, Point arg_position) {
+	current_grid[arg_position] = arg_subject_color;
+	
+	// コマをひっくり返す
+	for (auto t : arg_obtain_points_table) {
+		if (t.second == 0) {
+			continue;
+		}
+		
+		Point current_position = arg_position + direction_vec[t.first];
+		while (isPositionValid(current_position)) {
+			if (current_grid[current_position] != getEnemyPieceColor(arg_subject_color)) {
+				break;
+			}
+			
+			turnOver(current_position);
+			current_position += direction_vec[t.first];
+		}
+	}
+}
+
+// コマをひっくり返す
+void Board::turnOver(Point arg_position) {
+	current_grid[arg_position] = getEnemyPieceColor(current_grid[arg_position]);
+}
+
+// 座標が有効か
+bool Board::isPositionValid(Point arg_position) {
+	if (arg_position.x < 0 || arg_position.y < 0) {
+		return false;
+	}
+	else if (arg_position.x >= board_squares || arg_position.y >= board_squares) {
+		return false;
+	}
+	
+	return true;
+}
+
 // コマの描画
 void Board::drawPiece(int x, int y) {
 	if (current_grid[y][x] == SquareStatus::Black) {
@@ -69,9 +149,25 @@ void Board::draw() {
 	for (int y=0; y<board_squares; y++) {
 		for (int x=0; x<board_squares; x++) {
 			// マスの描画
+			// マウスオーバー時
 			if (square_rects[y][x].mouseOver()) {
-				square_rects[y][x].draw(BACKGROUND_COLOR_HILIGHT).drawFrame(1, line_color);
+				HashTable<Direction::Type, int> obtain_points_table = calcObtainPoints(SquareStatus::White, Point(x, y));
+				int total_obtain_points = calcTotalObtainPoints(obtain_points_table);
+				
+				// コマが置ける場合
+				if (total_obtain_points > 0) {
+					square_rects[y][x].draw(BACKGROUND_COLOR_HILIGHT).drawFrame(1, line_color);
+					
+					if (square_rects[y][x].leftReleased()) {
+						putPiece(obtain_points_table, SquareStatus::White, Point(x, y));
+					}
+				}
+				// コマが置けない場合
+				else {
+					square_rects[y][x].draw(BACKGROUND_COLOR).drawFrame(1, line_color);
+				}
 			}
+			// それ以外
 			else {
 				square_rects[y][x].draw(BACKGROUND_COLOR).drawFrame(1, line_color);
 			}

@@ -21,6 +21,21 @@ public:
 	// コマの色の逆を取得
 	SquareStatus::Type getEnemyPieceColor(SquareStatus::Type arg_ally_piece_color);
 	
+	// 各方向の取得可能なコマ数を算出
+	HashTable<Direction::Type, int> calcObtainPoints(SquareStatus::Type arg_subject_color, Point arg_start_position);
+	
+	// 取得可能なコマ数の総計
+	int calcTotalObtainPoints(HashTable<Direction::Type, int> arg_points_table);
+	
+	// コマを置く（注：呼び出し時にマスに置けるか判定済みであることが必須）
+	void putPiece(HashTable<Direction::Type, int> arg_obtain_points_table, SquareStatus::Type arg_subject_color, Point arg_position);
+	
+	// コマをひっくり返す
+	void turnOver(Point arg_position);
+	
+	// 座標が有効か
+	bool isPositionValid(Point arg_position);
+	
 	// コマの描画
 	void drawPiece(int x, int y);
 	
@@ -55,6 +70,18 @@ private:
 	
 	// マス用図形
 	Grid<Rect> square_rects;
+	
+	// 各方向のベクトル
+	HashTable<Direction::Type, Point> direction_vec = {
+		{Direction::UpperLeft,	Point{-1, -1}},
+		{Direction::Up,			Point{ 0, -1}},
+		{Direction::UpperRight,	Point{ 1, -1}},
+		{Direction::Right,		Point{ 1,  0}},
+		{Direction::LowerRight,	Point{ 1,  1}},
+		{Direction::Low,		Point{ 0,  1}},
+		{Direction::LowerLeft,	Point{-1,  1}},
+		{Direction::Left,		Point{-1,  0}}
+	};
 };
 
 #endif /* Board_hpp */

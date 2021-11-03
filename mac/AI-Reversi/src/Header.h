@@ -5,6 +5,8 @@
 //  Created by YotioSoft on 2021/11/03.
 //
 
+#pragma once
+
 #ifndef Header_h
 #define Header_h
 
@@ -18,6 +20,19 @@ enum Type {
 	Black	= -1,
 	None	= 0,
 	White	= 1
+};
+}
+
+namespace Direction {
+enum Type {
+	UpperLeft	= 11,
+	Up			= 15,
+	UpperRight	= 19,
+	Right		= 9,
+	LowerRight	= 29,
+	Low			= 25,
+	LowerLeft	= 21,
+	Left		= 1
 };
 }
 
