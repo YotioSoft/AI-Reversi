@@ -27,7 +27,7 @@ public:
 	Solver(SquareStatus::Type arg_AI_color, Board current_board);
 	
 	// 探索
-	SolveResult solve(Node& parent_node, SquareStatus::Type sim_color, int depth);
+	SolveResult minMax(Node& parent_node, SquareStatus::Type sim_color, int depth);
 	
 	// AIの一手を返す
 	Board getSolvedBoard();

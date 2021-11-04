@@ -18,12 +18,18 @@ Solver::Solver(SquareStatus::Type arg_AI_color, Board current_board) {
 	SquareStatus::Type sim_color = AI_color;
 	
 	// 探索開始
-	best_result = solve(*current_node, sim_color, SOLVE_DEPTH);
+	best_result = minMax(*current_node, sim_color, SOLVE_DEPTH);
 }
 
 // 探索
-SolveResult Solver::solve(Node& parent_node, SquareStatus::Type sim_color, int depth) {
-	int best_points = 0;
+SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int depth) {
+	int best_points;
+	if (sim_color == AI_color) {
+		best_points = INT_MIN;
+	}
+	else {
+		best_points = INT_MAX;
+	}
 	Array<Point> best_way;
 	int obtain_points;
 	
@@ -42,10 +48,10 @@ SolveResult Solver::solve(Node& parent_node, SquareStatus::Type sim_color, int d
 			decision_count ++;
 			
 			if (sim_color == AI_color) {
-				std::cout << "AI obtain at " << x << "," << y << " : " << total_obtain_points <<std::endl;
+				std::cout << "depth: " << depth << "AI obtain at " << x << "," << y << " : " << total_obtain_points <<std::endl;
 			}
 			else {
-				std::cout << "Player obtain at " << x << "," << y << " : " << total_obtain_points <<std::endl;
+				std::cout << "depth: " << depth << "Player obtain at " << x << "," << y << " : " << total_obtain_points <<std::endl;
 			}
 			
 			// 盤面をコピー
@@ -59,7 +65,7 @@ SolveResult Solver::solve(Node& parent_node, SquareStatus::Type sim_color, int d
 			
 			// 子ノード探索
 			if (depth >= 1) {
-				SolveResult solve_result = solve(child_node, parent_node.getBoard()->getEnemyPieceColor(sim_color), depth-1);
+				SolveResult solve_result = minMax(child_node, parent_node.getBoard()->getEnemyPieceColor(sim_color), depth-1);
 				
 				if (sim_color == AI_color) {
 					obtain_points = total_obtain_points + solve_result.value;
