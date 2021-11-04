@@ -110,6 +110,58 @@ SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int 
 		}
 	}
 	
+	// パスした場合
+	// 盤面をコピー
+	Board child_node_board = *parent_node.getBoard();
+	
+	// 子ノード生成
+	Node child_node(child_node_board);
+	
+	// 子ノード探索
+	if (depth >= 1) {
+		SolveResult solve_result = minMax(child_node, parent_node.getBoard()->getEnemyPieceColor(sim_color), depth-1);
+		
+		if (sim_color == AI_color) {
+			obtain_points = solve_result.value;
+			
+			if (best_points < obtain_points) {
+				best_points = obtain_points;
+				best_way = {Point(-1, -1)};
+				best_way.append(solve_result.best_way);
+			}
+		}
+		else {
+			obtain_points = solve_result.value;
+			
+			if (best_points > obtain_points) {
+				best_points = obtain_points;
+				best_way = {Point(-1, -1)};
+				best_way.append(solve_result.best_way);
+			}
+		}
+		
+		// 親ノードに追加
+		parent_node.addChild(&child_node);
+	}
+	else {
+		if (sim_color == AI_color) {
+			obtain_points = 0;
+			
+			if (best_points < obtain_points) {
+				best_points = obtain_points;
+				best_way = {Point(-1, -1)};
+			}
+		}
+		else {
+			obtain_points = 0;
+			
+			if (best_points > obtain_points) {
+				best_points = obtain_points;
+				best_way = {Point(-1, -1)};
+			}
+		}
+	}
+	
 	SolveResult result = {
 		best_points,
 		best_way
@@ -126,8 +178,10 @@ Board Solver::getSolvedBoard() {
 	}
 	
 	Point best_point = best_result.best_way[0];
-	HashTable<Direction::Type, int> obtain_points_table = root_node.getBoard()->calcObtainPoints(AI_color, best_point);
-	root_node.getBoard()->putPiece(obtain_points_table, AI_color, best_point);
+	if (best_point.x >= 0 && best_point.y >= 0) {	// (-1, -1)のときはパス
+		HashTable<Direction::Type, int> obtain_points_table = root_node.getBoard()->calcObtainPoints(AI_color, best_point);
+		root_node.getBoard()->putPiece(obtain_points_table, AI_color, best_point);
+	}
 	
 	return *root_node.getBoard();
 }
