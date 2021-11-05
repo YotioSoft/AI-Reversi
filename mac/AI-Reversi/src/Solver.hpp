@@ -14,7 +14,7 @@
 #include "Node.hpp"
 #include "Board.hpp"
 
-#define SOLVE_DEPTH	2
+#define SOLVE_DEPTH	6
 
 typedef struct SolveResult {
 	int value;
@@ -32,12 +32,17 @@ public:
 	// AIの一手を返す
 	Board getSolvedBoard();
 	
+	// βカット
+	bool alpha_beta_cut(SquareStatus::Type this_turn_color, int value);
+	
 private:
 	Node root_node;
 	
 	SquareStatus::Type AI_color;
 	
 	SolveResult best_result;
+	
+	int depth_best_points;
 };
 
 #endif /* Solver_hpp */

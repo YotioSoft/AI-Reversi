@@ -40,18 +40,18 @@ SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int 
 			obtain_points = 0;
 			
 			HashTable<Direction::Type, int> obtain_points_table = parent_node.getBoard()->calcObtainPoints(sim_color, Point(x, y));
-			int total_obtain_points = parent_node.getBoard()->calcTotalObtainPoints(obtain_points_table);
+			int turn_obtain_points = parent_node.getBoard()->calcTotalObtainPoints(obtain_points_table);
 			
-			if (total_obtain_points == 0) {
+			if (turn_obtain_points == 0) {
 				continue;
 			}
 			decision_count ++;
 			
 			if (sim_color == AI_color) {
-				std::cout << "depth: " << depth << "AI obtain at " << x << "," << y << " : " << total_obtain_points <<std::endl;
+				std::cout << "depth: " << depth << "AI obtain at " << x << "," << y << " : " << turn_obtain_points <<std::endl;
 			}
 			else {
-				std::cout << "depth: " << depth << "Player obtain at " << x << "," << y << " : " << total_obtain_points <<std::endl;
+				std::cout << "depth: " << depth << "Player obtain at " << x << "," << y << " : " << turn_obtain_points <<std::endl;
 			}
 			
 			// 盤面をコピー
@@ -64,46 +64,64 @@ SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int 
 			Node child_node(child_node_board);
 			
 			// 子ノード探索
-			if (depth >= 1) {
-				SolveResult solve_result = minMax(child_node, parent_node.getBoard()->getEnemyPieceColor(sim_color), depth-1);
-				
-				if (sim_color == AI_color) {
-					obtain_points = total_obtain_points + solve_result.value;
+			if (alpha_beta_cut(sim_color, best_points)) {
+				if (depth >= 1) {
+					SolveResult solve_result = minMax(child_node, parent_node.getBoard()->getEnemyPieceColor(sim_color), depth-1);
 					
-					if (best_points <= obtain_points) {
-						best_points = obtain_points;
-						best_way = {Point(x, y)};
-						best_way.append(solve_result.best_way);
+					if (sim_color == AI_color) {
+						obtain_points = turn_obtain_points + solve_result.value;
+						
+						if (best_points < turn_obtain_points) {
+							best_points = obtain_points;
+							best_way = {Point(x, y)};
+							best_way.append(solve_result.best_way);
+							
+							if (depth_best_points < best_points) {
+								depth_best_points = best_points;
+							}
+						}
 					}
+					else {
+						obtain_points = -turn_obtain_points + solve_result.value;
+						
+						if (best_points > turn_obtain_points) {
+							best_points = obtain_points;
+							best_way = {Point(x, y)};
+							best_way.append(solve_result.best_way);
+							
+							if (depth_best_points > best_points) {
+								depth_best_points = best_points;
+							}
+						}
+					}
+					
+					// 親ノードに追加
+					parent_node.addChild(&child_node);
 				}
 				else {
-					obtain_points = -total_obtain_points + solve_result.value;
-					
-					if (best_points >= obtain_points) {
-						best_points = obtain_points;
-						best_way = {Point(x, y)};
-						best_way.append(solve_result.best_way);
+					if (sim_color == AI_color) {
+						obtain_points = turn_obtain_points;
+						
+						if (best_points < obtain_points) {
+							best_points = obtain_points;
+							best_way = {Point(x, y)};
+							
+							if (depth_best_points < best_points) {
+								depth_best_points = best_points;
+							}
+						}
 					}
-				}
-				
-				// 親ノードに追加
-				parent_node.addChild(&child_node);
-			}
-			else {
-				if (sim_color == AI_color) {
-					obtain_points = total_obtain_points;
-					
-					if (best_points <= obtain_points) {
-						best_points = obtain_points;
-						best_way = {Point(x, y)};
-					}
-				}
-				else {
-					obtain_points = -total_obtain_points;
-					
-					if (best_points >= obtain_points) {
-						best_points = obtain_points;
-						best_way = {Point(x, y)};
+					else {
+						obtain_points = -turn_obtain_points;
+						
+						if (best_points > obtain_points) {
+							best_points = obtain_points;
+							best_way = {Point(x, y)};
+							
+							if (depth_best_points > best_points) {
+								depth_best_points = best_points;
+							}
+						}
 					}
 				}
 			}
@@ -118,46 +136,56 @@ SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int 
 	Node child_node(child_node_board);
 	
 	// 子ノード探索
-	if (depth >= 1) {
-		SolveResult solve_result = minMax(child_node, parent_node.getBoard()->getEnemyPieceColor(sim_color), depth-1);
-		
-		if (sim_color == AI_color) {
-			obtain_points = solve_result.value;
+	if (alpha_beta_cut(sim_color, best_points)) {
+		if (depth >= 1) {
+			SolveResult solve_result = minMax(child_node, parent_node.getBoard()->getEnemyPieceColor(sim_color), depth-1);
 			
-			if (best_points < obtain_points) {
-				best_points = obtain_points;
-				best_way = {Point(-1, -1)};
-				best_way.append(solve_result.best_way);
+			if (sim_color == AI_color) {
+				obtain_points = solve_result.value;
+				
+				if (best_points < obtain_points) {
+					best_points = obtain_points;
+					best_way = {Point(-1, -1)};
+					best_way.append(solve_result.best_way);
+					
+					if (depth_best_points < best_points) {
+						depth_best_points = best_points;
+					}
+				}
 			}
+			else {
+				obtain_points = solve_result.value;
+				
+				if (best_points > obtain_points) {
+					best_points = obtain_points;
+					best_way = {Point(-1, -1)};
+					best_way.append(solve_result.best_way);
+					
+					if (depth_best_points > best_points) {
+						depth_best_points = best_points;
+					}
+				}
+			}
+			
+			// 親ノードに追加
+			parent_node.addChild(&child_node);
 		}
 		else {
-			obtain_points = solve_result.value;
-			
-			if (best_points > obtain_points) {
-				best_points = obtain_points;
-				best_way = {Point(-1, -1)};
-				best_way.append(solve_result.best_way);
+			if (sim_color == AI_color) {
+				obtain_points = 0;
+				
+				if (best_points < obtain_points) {
+					best_points = obtain_points;
+					best_way = {Point(-1, -1)};
+				}
 			}
-		}
-		
-		// 親ノードに追加
-		parent_node.addChild(&child_node);
-	}
-	else {
-		if (sim_color == AI_color) {
-			obtain_points = 0;
-			
-			if (best_points < obtain_points) {
-				best_points = obtain_points;
-				best_way = {Point(-1, -1)};
-			}
-		}
-		else {
-			obtain_points = 0;
-			
-			if (best_points > obtain_points) {
-				best_points = obtain_points;
-				best_way = {Point(-1, -1)};
+			else {
+				obtain_points = 0;
+				
+				if (best_points > obtain_points) {
+					best_points = obtain_points;
+					best_way = {Point(-1, -1)};
+				}
 			}
 		}
 	}
@@ -184,4 +212,24 @@ Board Solver::getSolvedBoard() {
 	}
 	
 	return *root_node.getBoard();
+}
+
+// βカット
+bool Solver::alpha_beta_cut(SquareStatus::Type this_turn_color, int value) {
+	if (this_turn_color == AI_color) {
+		if (value < depth_best_points) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	else {
+		if (value < depth_best_points) {
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
 }
