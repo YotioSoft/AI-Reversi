@@ -225,11 +225,11 @@ bool Solver::alpha_beta_cut(SquareStatus::Type this_turn_color, int value) {
 		}
 	}
 	else {
-		if (value < depth_best_points) {
-			return false;
+		if (value > depth_best_points) {
+			return true;
 		}
 		else {
-			return true;
+			return false;
 		}
 	}
 }
