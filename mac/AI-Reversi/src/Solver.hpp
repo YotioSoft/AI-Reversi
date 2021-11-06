@@ -33,7 +33,10 @@ public:
 	Board getSolvedBoard();
 	
 	// βカット
-	bool alpha_beta_cut(SquareStatus::Type this_turn_color, int value);
+	bool alpha_beta_cut(SquareStatus::Type this_turn_color, int depth, int value);
+	
+	// depth_best_pointsを更新
+	void update_depth_best_points(SquareStatus::Type this_turn_color, int depth, int value);
 	
 private:
 	Node root_node;
@@ -42,7 +45,7 @@ private:
 	
 	SolveResult best_result;
 	
-	int depth_best_points;
+	Array<int> depth_best_points;
 };
 
 #endif /* Solver_hpp */

@@ -17,6 +17,9 @@ Solver::Solver(SquareStatus::Type arg_AI_color, Board current_board) {
 	AI_color = arg_AI_color;
 	SquareStatus::Type sim_color = AI_color;
 	
+	// 各階層における最良点の初期化
+	depth_best_points.resize(SOLVE_DEPTH, 0);
+	
 	// 探索開始
 	best_result = minMax(*current_node, sim_color, SOLVE_DEPTH);
 }
@@ -47,12 +50,13 @@ SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int 
 			}
 			decision_count ++;
 			
+			/*
 			if (sim_color == AI_color) {
 				std::cout << "depth: " << depth << "AI obtain at " << x << "," << y << " : " << turn_obtain_points <<std::endl;
 			}
 			else {
 				std::cout << "depth: " << depth << "Player obtain at " << x << "," << y << " : " << turn_obtain_points <<std::endl;
-			}
+			}*/
 			
 			// 盤面をコピー
 			Board child_node_board = *parent_node.getBoard();
@@ -64,7 +68,7 @@ SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int 
 			Node child_node(child_node_board);
 			
 			// 子ノード探索
-			if (alpha_beta_cut(sim_color, best_points)) {
+			if (alpha_beta_cut(sim_color, depth, best_points)) {
 				if (depth >= 1) {
 					SolveResult solve_result = minMax(child_node, parent_node.getBoard()->getEnemyPieceColor(sim_color), depth-1);
 					
@@ -76,9 +80,7 @@ SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int 
 							best_way = {Point(x, y)};
 							best_way.append(solve_result.best_way);
 							
-							if (depth_best_points < best_points) {
-								depth_best_points = best_points;
-							}
+							update_depth_best_points(sim_color, depth, best_points);
 						}
 					}
 					else {
@@ -89,9 +91,7 @@ SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int 
 							best_way = {Point(x, y)};
 							best_way.append(solve_result.best_way);
 							
-							if (depth_best_points > best_points) {
-								depth_best_points = best_points;
-							}
+							update_depth_best_points(sim_color, depth, best_points);
 						}
 					}
 					
@@ -106,9 +106,7 @@ SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int 
 							best_points = obtain_points;
 							best_way = {Point(x, y)};
 							
-							if (depth_best_points < best_points) {
-								depth_best_points = best_points;
-							}
+							update_depth_best_points(sim_color, depth, best_points);
 						}
 					}
 					else {
@@ -118,9 +116,7 @@ SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int 
 							best_points = obtain_points;
 							best_way = {Point(x, y)};
 							
-							if (depth_best_points > best_points) {
-								depth_best_points = best_points;
-							}
+							update_depth_best_points(sim_color, depth, best_points);
 						}
 					}
 				}
@@ -136,7 +132,7 @@ SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int 
 	Node child_node(child_node_board);
 	
 	// 子ノード探索
-	if (alpha_beta_cut(sim_color, best_points)) {
+	if (alpha_beta_cut(sim_color, depth, best_points)) {
 		if (depth >= 1) {
 			SolveResult solve_result = minMax(child_node, parent_node.getBoard()->getEnemyPieceColor(sim_color), depth-1);
 			
@@ -148,9 +144,7 @@ SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int 
 					best_way = {Point(-1, -1)};
 					best_way.append(solve_result.best_way);
 					
-					if (depth_best_points < best_points) {
-						depth_best_points = best_points;
-					}
+					update_depth_best_points(sim_color, depth, best_points);
 				}
 			}
 			else {
@@ -161,9 +155,7 @@ SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int 
 					best_way = {Point(-1, -1)};
 					best_way.append(solve_result.best_way);
 					
-					if (depth_best_points > best_points) {
-						depth_best_points = best_points;
-					}
+					update_depth_best_points(sim_color, depth, best_points);
 				}
 			}
 			
@@ -177,6 +169,8 @@ SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int 
 				if (best_points < obtain_points) {
 					best_points = obtain_points;
 					best_way = {Point(-1, -1)};
+					
+					update_depth_best_points(sim_color, depth, best_points);
 				}
 			}
 			else {
@@ -185,6 +179,8 @@ SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int 
 				if (best_points > obtain_points) {
 					best_points = obtain_points;
 					best_way = {Point(-1, -1)};
+					
+					update_depth_best_points(sim_color, depth, best_points);
 				}
 			}
 		}
@@ -201,7 +197,7 @@ SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int 
 // AIの一手を返す
 Board Solver::getSolvedBoard() {
 	if (best_result.best_way.size() == 0) {
-		std::cout << "GAME SET" << std::endl;
+		std::cout << "PASS" << std::endl;
 		return *root_node.getBoard();
 	}
 	
@@ -215,9 +211,10 @@ Board Solver::getSolvedBoard() {
 }
 
 // βカット
-bool Solver::alpha_beta_cut(SquareStatus::Type this_turn_color, int value) {
+bool Solver::alpha_beta_cut(SquareStatus::Type this_turn_color, int depth, int value) {
+	std::cout << "AI Alpha-Beta at Depth: " << depth << " Value: " << value << " depth-best: " << depth_best_points[depth-1] << std::endl;
 	if (this_turn_color == AI_color) {
-		if (value < depth_best_points) {
+		if (value < depth_best_points[depth-1]) {
 			return true;
 		}
 		else {
@@ -225,11 +222,31 @@ bool Solver::alpha_beta_cut(SquareStatus::Type this_turn_color, int value) {
 		}
 	}
 	else {
-		if (value > depth_best_points) {
+		if (value > depth_best_points[depth-1]) {
 			return true;
 		}
 		else {
 			return false;
+		}
+	}
+}
+
+// depth_best_pointsを更新
+void Solver::update_depth_best_points(SquareStatus::Type this_turn_color, int depth, int value) {
+	if (value > 100 || value < -100) {
+		return;
+	}
+	
+	if (this_turn_color == AI_color) {
+		if (depth_best_points[depth-1] < value) {
+			std::cout << "AI Update Best-V at Depth: " << depth << " Value: " << value << std::endl;
+			depth_best_points[depth-1] = value;
+		}
+	}
+	else {
+		if (depth_best_points[depth-1] > value) {
+			std::cout << "Pl Update Best-V at Depth: " << depth << " Value: " << value << std::endl;
+			depth_best_points[depth-1] = value;
 		}
 	}
 }
