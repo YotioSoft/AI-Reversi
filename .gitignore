@@ -1,9 +1,9 @@
 /include
 /lib
-/Mac/Albus-Box/DerivedData
-/Windows/.vs
-/Windows/Albus-Box(0.4.3)
-/Mac/Albus-Box(0.4.3)
+/mac/AI-Reversi/DerivedData
+/windows/.vs
+/windows/AI-Reversi/.vs
+/windows/AI-Reversi/Intermediate/
 /id3lib-3.8.3/
 *.ilk
 *.pdb
@@ -13,8 +13,6 @@
 *.obj
 *.log
 *.tlog
-Windows/Albus-Box/.vs/Albus-Box/v16/
-Windows/Albus-Box/Intermediate
 audio_profiles.json
 settings.json
 
