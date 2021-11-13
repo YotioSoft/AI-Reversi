@@ -18,7 +18,7 @@
 
 typedef struct SolveResult {
 	int value;
-	Array<Point> best_way;
+	Node* node;
 } SolveResult;
 
 class Solver {
@@ -27,13 +27,16 @@ public:
 	Solver(SquareStatus::Type arg_AI_color, Board current_board);
 	
 	// 探索
-	SolveResult minMax(Node& parent_node, SquareStatus::Type sim_color, int depth);
-	
-	// AIの一手を返す
-	Board getSolvedBoard();
+	void makeTree(Node& parent_node, SquareStatus::Type sim_color, int depth);
+
+	// min-max
+	SolveResult minMax(Node& node, int depth);
 	
 	// βカット
-	bool alpha_beta_cut(SquareStatus::Type this_turn_color, int depth, int value);
+	SolveResult alpha_beta_cut(Node& node, int depth, int alpha, int beta);
+
+	// AIの一手を返す
+	Board getSolvedBoard();
 	
 	// depth_best_pointsを更新
 	void update_depth_best_points(SquareStatus::Type this_turn_color, int depth, int value);

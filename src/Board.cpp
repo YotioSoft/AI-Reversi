@@ -113,6 +113,8 @@ void Board::putPiece(HashTable<Direction::Type, int> arg_obtain_points_table, Sq
 	else {
 		return;
 	}
+
+	last_put_pos = arg_position;
 	
 	// コマをひっくり返す
 	for (auto t : arg_obtain_points_table) {
@@ -199,6 +201,11 @@ Color Board::getPieceColor(SquareStatus::Type arg_color) {
 	else {
 		return Color(0, 0, 0, 255);
 	}
+}
+
+// 最後にコマを置いたマスを取得
+Point Board::getLastPutPosition() {
+	return last_put_pos;
 }
 
 // コマの描画

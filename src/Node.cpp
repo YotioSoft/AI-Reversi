@@ -23,6 +23,11 @@ Array<Node*> Node::getChildren() {
 	return children;
 }
 
+// 子ノードの数
+int Node::countChildren() {
+	return children.size();
+}
+
 // 盤面を取得
 Board* Node::getBoard() {
 	return &board;

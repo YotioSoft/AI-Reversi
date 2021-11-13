@@ -24,6 +24,9 @@ public:
 	
 	// 子ノードの取得
 	Array<Node*> getChildren();
+
+	// 子ノードの数
+	int countChildren();
 	
 	// 盤面を取得
 	Board* getBoard();

@@ -21,11 +21,12 @@ Solver::Solver(SquareStatus::Type arg_AI_color, Board current_board) {
 	depth_best_points.resize(SOLVE_DEPTH, 0);
 	
 	// 探索開始
-	best_result = minMax(*current_node, sim_color, SOLVE_DEPTH);
+	makeTree(*current_node, sim_color, SOLVE_DEPTH);
+	best_result = minMax(*current_node, SOLVE_DEPTH);
 }
 
 // 探索
-SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int depth) {
+void Solver::makeTree(Node& parent_node, SquareStatus::Type sim_color, int depth) {
 	int best_points;
 	if (sim_color == AI_color) {
 		best_points = INT_MIN;
@@ -37,21 +38,16 @@ SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int 
 	int obtain_points;
 	
 	int decision_count = 0;
-	Console << U"A";
 	for (int y=0; y<parent_node.getBoard()->getBoardSquares(); y++) {
-		Console << U"y:" << y;
 		for (int x=0; x<parent_node.getBoard()->getBoardSquares(); x++) {
-			Console << U"x:" << x;
 			obtain_points = 0;
 			
 			HashTable<Direction::Type, int> obtain_points_table = parent_node.getBoard()->calcObtainPoints(sim_color, Point(x, y));
 			int turn_obtain_points = parent_node.getBoard()->calcTotalObtainPoints(obtain_points_table);
-			Console << U"B";
 			if (turn_obtain_points == 0) {
 				continue;
 			}
 			decision_count ++;
-			Console << U"C";
 			/*
 			if (sim_color == AI_color) {
 				std::cout << "depth: " << depth << "AI obtain at " << x << "," << y << " : " << turn_obtain_points <<std::endl;
@@ -62,68 +58,20 @@ SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int 
 			
 			// 盤面をコピー
 			Board child_node_board = *parent_node.getBoard();
-			Console << U"D";
+			
 			// コピーした盤面でコマを置く
 			child_node_board.putPiece(obtain_points_table, sim_color, Point(x, y));
 			
 			// 子ノード生成
 			Node child_node(child_node_board);
-			Console << U"E";
-			// 子ノード探索
-			if (alpha_beta_cut(sim_color, depth, best_points)) {
-				if (depth >= 1) {
-					SolveResult solve_result = minMax(child_node, parent_node.getBoard()->getEnemyPieceColor(sim_color), depth-1);
-					
-					if (sim_color == AI_color) {
-						obtain_points = turn_obtain_points + solve_result.value;
-						
-						if (best_points < turn_obtain_points) {
-							best_points = obtain_points;
-							best_way = {Point(x, y)};
-							best_way.append(solve_result.best_way);
-							
-							update_depth_best_points(sim_color, depth, best_points);
-						}
-					}
-					else {
-						obtain_points = -turn_obtain_points + solve_result.value;
-						
-						if (best_points > turn_obtain_points) {
-							best_points = obtain_points;
-							best_way = {Point(x, y)};
-							best_way.append(solve_result.best_way);
-							
-							update_depth_best_points(sim_color, depth, best_points);
-						}
-					}
-					
-					// 親ノードに追加
-					parent_node.addChild(&child_node);
-				}
-				else {
-					if (sim_color == AI_color) {
-						obtain_points = turn_obtain_points;
-						
-						if (best_points < obtain_points) {
-							best_points = obtain_points;
-							best_way = {Point(x, y)};
-							
-							update_depth_best_points(sim_color, depth, best_points);
-						}
-					}
-					else {
-						obtain_points = -turn_obtain_points;
-						
-						if (best_points > obtain_points) {
-							best_points = obtain_points;
-							best_way = {Point(x, y)};
-							
-							update_depth_best_points(sim_color, depth, best_points);
-						}
-					}
-				}
+
+			// 子ノード生成
+			if (depth >= 1) {
+				makeTree(child_node, parent_node.getBoard()->getEnemyPieceColor(sim_color), depth - 1);
+
+				// 親ノードに追加
+				parent_node.addChild(&child_node);
 			}
-			Console << U"F";
 		}
 	}
 	
@@ -135,105 +83,73 @@ SolveResult Solver::minMax(Node& parent_node, SquareStatus::Type sim_color, int 
 	Node child_node(child_node_board);
 	
 	// 子ノード探索
-	if (alpha_beta_cut(sim_color, depth, best_points)) {
-		if (depth >= 1) {
-			SolveResult solve_result = minMax(child_node, parent_node.getBoard()->getEnemyPieceColor(sim_color), depth-1);
-			
-			if (sim_color == AI_color) {
-				obtain_points = solve_result.value;
-				
-				if (best_points < obtain_points) {
-					best_points = obtain_points;
-					best_way = {Point(-1, -1)};
-					best_way.append(solve_result.best_way);
-					
-					update_depth_best_points(sim_color, depth, best_points);
-				}
-			}
-			else {
-				obtain_points = solve_result.value;
-				
-				if (best_points > obtain_points) {
-					best_points = obtain_points;
-					best_way = {Point(-1, -1)};
-					best_way.append(solve_result.best_way);
-					
-					update_depth_best_points(sim_color, depth, best_points);
-				}
-			}
-			
-			// 親ノードに追加
-			parent_node.addChild(&child_node);
-		}
-		else {
-			if (sim_color == AI_color) {
-				obtain_points = 0;
-				
-				if (best_points < obtain_points) {
-					best_points = obtain_points;
-					best_way = {Point(-1, -1)};
-					
-					update_depth_best_points(sim_color, depth, best_points);
-				}
-			}
-			else {
-				obtain_points = 0;
-				
-				if (best_points > obtain_points) {
-					best_points = obtain_points;
-					best_way = {Point(-1, -1)};
-					
-					update_depth_best_points(sim_color, depth, best_points);
-				}
-			}
-		}
+	if (depth >= 1) {
+		makeTree(child_node, parent_node.getBoard()->getEnemyPieceColor(sim_color), depth - 1);
+
+		// 親ノードに追加
+		parent_node.addChild(&child_node);
 	}
-	
-	SolveResult result = {
-		best_points,
-		best_way
-	};
-	
-	return result;
+}
+
+// min-max
+SolveResult Solver::minMax(Node& node, int depth) {
+	return alpha_beta_cut(node, depth, INT_MIN, INT_MAX);
+}
+
+// αβ法
+SolveResult Solver::alpha_beta_cut(Node& node, int depth, int alpha, int beta) {
+	// 終端ノードなら評価値を返す
+	if (node.countChildren() == 0 || depth == 0) {
+		return { node.getBoard()->getAIPoints() - node.getBoard()->getPlayerPoints(), &node };
+	}
+
+	// AIの手のノードなら最大化
+	if (node.getBoard()->isAIturn()) {
+		Node* best_child = nullptr;
+		for (auto child : node.getChildren()) {
+			int before_alpha = alpha;
+			alpha = std::max(alpha, alpha_beta_cut(*child, depth - 1, alpha, beta).value);
+			if (alpha >= beta) {
+				break;	// ここでβカット
+			}
+			if (alpha > before_alpha) {
+				best_child = child;
+			}
+		}
+		return { alpha, best_child };
+	}
+	// プレイヤーのノードなら最小化
+	else {
+		Node* best_child = nullptr;
+		for (auto child : node.getChildren()) {
+			int before_beta = beta;
+			beta = std::min(beta, alpha_beta_cut(*child, depth - 1, alpha, beta).value);
+			if (alpha >= beta) {
+				break;	// ここでαカット
+			}
+			if (beta > before_beta) {
+				best_child = child;
+			}
+		}
+		return { beta, best_child };
+	}
 }
 
 // AIの一手を返す
 Board Solver::getSolvedBoard() {
-	if (best_result.best_way.size() == 0) {
+	if (best_result.node == nullptr) {
 		std::cout << "PASS" << std::endl;
 		return *root_node.getBoard();
 	}
 	
-	Point best_point = best_result.best_way[0];
-	if (best_point.x >= 0 && best_point.y >= 0) {	// (-1, -1)のときはパス
-		HashTable<Direction::Type, int> obtain_points_table = root_node.getBoard()->calcObtainPoints(AI_color, best_point);
-		root_node.getBoard()->putPiece(obtain_points_table, AI_color, best_point);
+	Node* best_node = best_result.node;
+	Point last_pos = best_result.node->getBoard()->getLastPutPosition();
+	if (last_pos.x >= 0 && last_pos.y >= 0) {	// (-1, -1)のときはパス
+		HashTable<Direction::Type, int> obtain_points_table = root_node.getBoard()->calcObtainPoints(AI_color, last_pos);
+		root_node.getBoard()->putPiece(obtain_points_table, AI_color, last_pos);
 	}
 	
 	return *root_node.getBoard();
-}
-
-// βカット
-bool Solver::alpha_beta_cut(SquareStatus::Type this_turn_color, int depth, int value) {
-	Console << depth - 1;
-	Console << depth_best_points;
-	std::cout << "AI Alpha-Beta at Depth: " << depth << " Value: " << value << " depth-best: " << depth_best_points[depth-1] << std::endl;
-	if (this_turn_color == AI_color) {
-		if (value < depth_best_points[depth-1]) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	else {
-		if (value > depth_best_points[depth-1]) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
 }
 
 // depth_best_pointsを更新

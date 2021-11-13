@@ -57,6 +57,9 @@ public:
 	
 	// コマの色の取得
 	Color getPieceColor(SquareStatus::Type arg_color);
+
+	// 最後にコマを置いたマスを取得
+	Point getLastPutPosition();
 	
 	// コマの描画
 	void drawPiece(int x, int y);
@@ -115,6 +118,9 @@ private:
 		{Direction::LowerLeft,	Point{-1,  1}},
 		{Direction::Left,		Point{-1,  0}}
 	};
+
+	// 最後にコマをおいたマス
+	Point last_put_pos;
 };
 
 #endif /* Board_hpp */
