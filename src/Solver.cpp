@@ -40,6 +40,7 @@ void Solver::makeTree(Node& parent_node, SquareStatus::Type sim_color, int depth
 	int decision_count = 0;
 	for (int y=0; y<parent_node.getBoard()->getBoardSquares(); y++) {
 		for (int x=0; x<parent_node.getBoard()->getBoardSquares(); x++) {
+			Console << U"(x,y)=(" << x << U"," << y << U")";
 			obtain_points = 0;
 			
 			HashTable<Direction::Type, int> obtain_points_table = parent_node.getBoard()->calcObtainPoints(sim_color, Point(x, y));
